@@ -8,6 +8,25 @@ use ratatui::{
 
 use crate::app::{App, CurrentScreen, CurrentlyEditing};
 
+pub fn ui2(frame: &mut Frame, _app: &App) {
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Length(4), Constraint::Min(1)])
+        .split(frame.size());
+
+    let title_block = Block::default()
+        .borders(Borders::ALL)
+        .style(Style::default());
+
+    let title = Paragraph::new(Text::styled(
+        "POSTMAN TUI - You Can Request!",
+        Style::default().fg(Color::Green),
+    ))
+    .block(title_block);
+
+    frame.render_widget(title, chunks[0]);
+}
+
 pub fn ui(frame: &mut Frame, app: &App) {
     // Create the layout sections.
     let chunks = Layout::default()
