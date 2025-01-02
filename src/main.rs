@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // create app and run it
     let mut app = App::new();
-    let res = run_app(&mut terminal, &mut app);
+    let _res = run_app(&mut terminal, &mut app);
 
     // restore terminal
     disable_raw_mode()?;
@@ -37,14 +37,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         DisableMouseCapture
     )?;
     terminal.show_cursor()?;
-
-    if let Ok(do_print) = res {
-        if do_print {
-            app.print_json()?;
-        }
-    } else if let Err(err) = res {
-        println!("{err:?}");
-    }
 
     Ok(())
 }
@@ -65,7 +57,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                         app.currently_editing = Some(CurrentlyEditing::Key);
                     }
                     KeyCode::Char('q') => {
-                        app.current_screen = CurrentScreen::Exiting;
+                        return Ok(true);
                     }
                     _ => {}
                 },

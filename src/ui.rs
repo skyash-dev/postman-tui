@@ -1,8 +1,11 @@
+use std::vec;
+
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Style},
+    style::{Color, Style, Stylize},
+    symbols,
     text::{Line, Span, Text},
-    widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Wrap},
+    widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Tabs, Wrap},
     Frame,
 };
 
@@ -11,8 +14,12 @@ use crate::app::{App, CurrentScreen, CurrentlyEditing};
 pub fn ui2(frame: &mut Frame, _app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Length(4), Constraint::Min(1)])
-        .split(frame.size());
+        .constraints([
+            Constraint::Length(3),
+            Constraint::Length(3),
+            Constraint::Min(1),
+        ])
+        .split(frame.area());
 
     let title_block = Block::default()
         .borders(Borders::ALL)
@@ -25,6 +32,41 @@ pub fn ui2(frame: &mut Frame, _app: &App) {
     .block(title_block);
 
     frame.render_widget(title, chunks[0]);
+
+    // let tabs = Tabs::new(vec!["Request 1"])
+    //     .block(Block::bordered())
+    //     .style(Style::default().white())
+    //     .highlight_style(Style::default().yellow())
+    //     .divider("|");
+
+    // frame.render_widget(tabs, chunks[1]);
+
+    let request_layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(10), Constraint::Percentage(90)])
+        .split(chunks[1]);
+
+    let get = Span::styled("GET", Style::default().fg(Color::White).bg(Color::Green));
+    let verb_select =
+        Paragraph::new(Line::from(vec![get])).block(Block::default().borders(Borders::ALL));
+
+    let url = Span::styled(
+        "https://www.notionwrapped.tech/",
+        Style::default().fg(Color::White),
+    );
+    let url_box =
+        Paragraph::new(Line::from(vec![url])).block(Block::default().borders(Borders::ALL));
+
+    frame.render_widget(verb_select, request_layout[0]);
+    frame.render_widget(url_box, request_layout[1]);
+
+    let response_data = Paragraph::new(Text::styled(
+        "Response Data",
+        Style::default().fg(Color::Green),
+    ))
+    .block(Block::default().borders(Borders::ALL));
+
+    frame.render_widget(response_data, chunks[2]);
 }
 
 pub fn ui(frame: &mut Frame, app: &App) {
