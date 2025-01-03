@@ -63,8 +63,10 @@ pub fn ui2(frame: &mut Frame, _app: &App) {
     frame.render_widget(verb_select, request_layout[0]);
     frame.render_widget(url_box, request_layout[1]);
 
+    let response_text = _app.response_data.clone().unwrap_or("".to_string());
+
     let response_data = Paragraph::new(Text::styled(
-        "Response Data",
+        response_text,
         Style::default().fg(Color::Green),
     ))
     .block(Block::default().borders(Borders::ALL));
