@@ -52,34 +52,45 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
             }
             match app.current_screen {
                 CurrentScreen::Main => match key.code {
-                    KeyCode::Char('e') => {
+                    KeyCode::Char('u') => {
                         app.current_screen = CurrentScreen::Editing;
-                        app.currently_editing = Some(CurrentlyEditing::Key);
+                        app.currently_editing = Some(CurrentlyEditing::Url);
+                    }
+                    KeyCode::Char('v') => {
+                        app.current_screen = CurrentScreen::Editing;
+                        app.currently_editing = Some(CurrentlyEditing::Verb);
                     }
                     KeyCode::Char('q') => {
                         return Ok(true);
                     }
                     _ => {}
                 },
-                CurrentScreen::Exiting => match key.code {
-                    KeyCode::Char('y') => {
-                        return Ok(true);
-                    }
-                    KeyCode::Char('n') | KeyCode::Char('q') => {
-                        return Ok(false);
-                    }
-                    _ => {}
-                },
                 CurrentScreen::Editing if key.kind == KeyEventKind::Press => match key.code {
                     KeyCode::Enter => {
+                        app.current_screen = CurrentScreen::Main;
+                        app.make_request();
+                    }
+                    KeyCode::Esc => {
+                        app.current_screen = CurrentScreen::Main;
+                        app.currently_editing = None;
+                    }
+                    KeyCode::Tab => match app.currently_editing {
+                        Some(CurrentlyEditing::Verb) => {
+                            app.currently_editing = Some(CurrentlyEditing::Url)
+                        }
+                        Some(CurrentlyEditing::Url) => {
+                            app.currently_editing = Some(CurrentlyEditing::Verb)
+                        }
+                        None => app.currently_editing = None,
+                    },
+                    KeyCode::Char(value) => {
                         if let Some(editing) = &app.currently_editing {
                             match editing {
-                                CurrentlyEditing::Key => {
-                                    app.currently_editing = Some(CurrentlyEditing::Value);
+                                CurrentlyEditing::Verb => {
+                                    app.verb_input.push(value);
                                 }
-                                CurrentlyEditing::Value => {
-                                    app.save_key_value();
-                                    app.current_screen = CurrentScreen::Main;
+                                CurrentlyEditing::Url => {
+                                    app.url_input.push(value);
                                 }
                             }
                         }
@@ -87,32 +98,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<
                     KeyCode::Backspace => {
                         if let Some(editing) = &app.currently_editing {
                             match editing {
-                                CurrentlyEditing::Key => {
-                                    app.key_input.pop();
-                                }
-                                CurrentlyEditing::Value => {
-                                    app.value_input.pop();
-                                }
-                            }
-                        }
-                    }
-                    KeyCode::Esc => {
-                        app.current_screen = CurrentScreen::Main;
-                        app.currently_editing = None;
-                    }
-                    KeyCode::Tab => {
-                        app.toggle_editing();
-                    }
-                    KeyCode::Char(value) => {
-                        if let Some(editing) = &app.currently_editing {
-                            match editing {
-                                CurrentlyEditing::Key => {
-                                    app.key_input.push(value);
-                                }
-                                CurrentlyEditing::Value => {
-                                    app.value_input.push(value);
-                                }
-                            }
+                                CurrentlyEditing::Verb => app.verb_input.pop(),
+                                CurrentlyEditing::Url => app.url_input.pop(),
+                            };
                         }
                     }
                     _ => {}
