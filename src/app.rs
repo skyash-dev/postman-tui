@@ -28,10 +28,12 @@ impl App {
     }
 
     pub fn make_request(&mut self) {
-        self.response_data = Some(format!(
-            "Making request to {} with verb {}",
-            self.url_input, self.verb_input
-        ));
+        let response = reqwest::blocking::get(&self.url_input)
+            .unwrap()
+            .text()
+            .unwrap();
+
+        self.response_data = Some(response);
 
         self.current_screen = CurrentScreen::Main;
         self.currently_editing = None;
