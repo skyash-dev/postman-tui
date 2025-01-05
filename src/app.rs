@@ -1,5 +1,8 @@
 use ratatui::{prelude::*, widgets::*};
 use std::io::{self, stdout, Error};
+use std::time::Duration;
+
+use crossterm::event::{self, Event, KeyCode};
 
 #[derive(PartialEq, Default)]
 pub enum CurrentScreen {
@@ -31,7 +34,7 @@ impl App2 {
     pub fn run(&mut self, terminal: &mut Terminal<impl Backend>) -> Result<(), Error> {
         while self.is_running() {
             self.draw(terminal)?;
-            // self.handle_input(terminal)?;
+            self.handle_input()?;
         }
         Ok(())
     }
@@ -44,6 +47,35 @@ impl App2 {
         terminal.draw(|frame| {
             frame.render_widget(self, frame.area());
         })?;
+        Ok(())
+    }
+
+    pub fn handle_input(&mut self) -> Result<(), Error> {
+        let timeout = Duration::from_secs_f64(1.0 / 50.0);
+        if !event::poll(timeout)? {
+            return Ok(());
+        }
+
+        if let Event::Key(key) = event::read()? {
+            match self.current_screen {
+                CurrentScreen::Main => match key.code {
+                    KeyCode::Char('q') => {
+                        self.current_screen = CurrentScreen::Quit;
+                    }
+                    _ => {}
+                },
+                CurrentScreen::Editing => match key.code {
+                    KeyCode::Char('q') => {
+                        self.current_screen = CurrentScreen::Quit;
+                    }
+                    _ => {}
+                },
+                CurrentScreen::Quit => {
+                    return Ok(());
+                }
+            }
+        }
+
         Ok(())
     }
 }
