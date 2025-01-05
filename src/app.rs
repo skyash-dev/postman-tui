@@ -1,6 +1,12 @@
+use ratatui::{prelude::*, widgets::*};
+use std::io::{self, stdout, Error};
+
+#[derive(PartialEq, Default)]
 pub enum CurrentScreen {
+    #[default]
     Main,
     Editing,
+    Quit,
 }
 
 pub enum CurrentlyEditing {
@@ -14,6 +20,51 @@ pub struct App {
     pub current_screen: CurrentScreen,
     pub currently_editing: Option<CurrentlyEditing>,
     pub response_data: Option<String>,
+}
+
+#[derive(Default)]
+pub struct App2 {
+    pub current_screen: CurrentScreen,
+}
+
+impl App2 {
+    pub fn run(&mut self, terminal: &mut Terminal<impl Backend>) -> Result<(), Error> {
+        while self.is_running() {
+            self.draw(terminal)?;
+            // self.handle_input(terminal)?;
+        }
+        Ok(())
+    }
+
+    fn is_running(&self) -> bool {
+        self.current_screen != CurrentScreen::Quit
+    }
+
+    fn draw(&self, terminal: &mut Terminal<impl Backend>) -> Result<(), Error> {
+        terminal.draw(|frame| {
+            frame.render_widget(self, frame.area());
+        })?;
+        Ok(())
+    }
+}
+
+impl Widget for &App2 {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let vertical = Layout::vertical([Constraint::Length(3), Constraint::Min(1)]);
+
+        let [title, tabs] = vertical.areas(area);
+
+        let title_block = Block::bordered();
+
+        let title_text =
+            Paragraph::new("POSTMAN TUI - You Can Request!".green().bold()).block(title_block);
+        title_text.render(title, buf);
+
+        let tabs_block = Block::bordered();
+
+        let tabs_text = Paragraph::new("tabs".green().bold()).block(tabs_block);
+        tabs_text.render(tabs, buf);
+    }
 }
 
 impl App {
