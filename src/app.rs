@@ -17,6 +17,16 @@ pub enum CurrentlyEditing {
     Verb,
 }
 
+pub struct Tab {
+    pub verb_input: String,
+    pub url_input: String,
+    pub response_data: Option<String>,
+}
+
+impl Tab {
+    pub fn render(&self, area: Rect, buf: &mut Buffer);
+}
+
 pub struct App {
     pub url_input: String,
     pub verb_input: String,
@@ -86,39 +96,70 @@ impl Widget for &App2 {
 
         let [title, tabs] = vertical.areas(area);
 
+        self.render_header(title, buf);
+        self.render_tabs(tabs, buf);
+    }
+}
+
+impl App2 {
+    pub fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
         let title_block = Block::bordered();
 
         let title_text =
             Paragraph::new("POSTMAN TUI - You Can Request!".green().bold()).block(title_block);
-        title_text.render(title, buf);
+        title_text.render(area, buf);
+    }
 
+    pub fn render_header(&self, area: Rect, buf: &mut Buffer) {
         let tabs_block = Block::bordered();
 
         let tabs_text = Paragraph::new("tabs".green().bold()).block(tabs_block);
-        tabs_text.render(tabs, buf);
+        tabs_text.render(area, buf);
     }
 }
 
-impl App {
-    pub fn new() -> App {
-        App {
-            url_input: String::new(),
-            verb_input: String::new(),
-            current_screen: CurrentScreen::Main,
-            currently_editing: None,
-            response_data: None,
-        }
-    }
+// impl App {
+//     pub fn new() -> App {
+//         App {
+//             url_input: String::new(),
+//             verb_input: String::new(),
+//             current_screen: CurrentScreen::Main,
+//             currently_editing: None,
+//             response_data: None,
+//         }
+//     }
 
-    pub fn make_request(&mut self) {
-        let response = reqwest::blocking::get(&self.url_input)
-            .unwrap()
-            .text()
-            .unwrap();
+//     pub fn make_request(&mut self) {
+//         let response = reqwest::blocking::get(&self.url_input)
+//             .unwrap()
+//             .text()
+//             .unwrap();
 
-        self.response_data = Some(response);
+//         self.response_data = Some(response);
 
-        self.current_screen = CurrentScreen::Main;
-        self.currently_editing = None;
-    }
-}
+//         self.current_screen = CurrentScreen::Main;
+//         self.currently_editing = None;
+//     }
+// }
+//     pub fn new() -> App {
+//         App {
+//             url_input: String::new(),
+//             verb_input: String::new(),
+//             current_screen: CurrentScreen::Main,
+//             currently_editing: None,
+//             response_data: None,
+//         }
+//     }
+
+//     pub fn make_request(&mut self) {
+//         let response = reqwest::blocking::get(&self.url_input)
+//             .unwrap()
+//             .text()
+//             .unwrap();
+
+//         self.response_data = Some(response);
+
+//         self.current_screen = CurrentScreen::Main;
+//         self.currently_editing = None;
+//     }
+// }
