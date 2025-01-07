@@ -14,13 +14,13 @@ pub enum CurrentScreen {
     Quit,
 }
 
-pub struct App2 {
+pub struct App {
     pub current_screen: CurrentScreen,
     pub active_tab: usize,
     pub tabs: Vec<Tab>,
 }
 
-impl Default for App2 {
+impl Default for App {
     fn default() -> Self {
         let tab1 = Tab {
             verb_input: "GET".to_string(),
@@ -35,7 +35,7 @@ impl Default for App2 {
             currently_editing: None,
         };
 
-        App2 {
+        App {
             current_screen: CurrentScreen::Main,
             active_tab: 0,
             tabs: vec![tab1, tab2],
@@ -43,7 +43,7 @@ impl Default for App2 {
     }
 }
 
-impl App2 {
+impl App {
     pub fn run(&mut self, terminal: &mut Terminal<impl Backend>) -> Result<(), Error> {
         while self.is_running() {
             self.draw(terminal)?;
@@ -133,7 +133,7 @@ impl App2 {
     }
 }
 
-impl Widget for &App2 {
+impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let vertical = Layout::vertical([Constraint::Length(3), Constraint::Min(1)]);
 
@@ -144,7 +144,7 @@ impl Widget for &App2 {
     }
 }
 
-impl App2 {
+impl App {
     pub fn render_tabs(&self, area: Rect, buf: &mut Buffer) {
         // let title_block = Block::bordered();
 
@@ -168,37 +168,5 @@ impl App2 {
             .block(tabs_block);
 
         tabs.render(area, buf);
-    }
-}
-
-pub struct App {
-    pub url_input: String,
-    pub verb_input: String,
-    pub current_screen: CurrentScreen,
-    pub currently_editing: Option<RequestInformation>,
-    pub response_data: Option<String>,
-}
-
-impl App {
-    pub fn new() -> App {
-        App {
-            url_input: String::new(),
-            verb_input: String::new(),
-            current_screen: CurrentScreen::Main,
-            currently_editing: None,
-            response_data: None,
-        }
-    }
-
-    pub fn make_request(&mut self) {
-        let response = reqwest::blocking::get(&self.url_input)
-            .unwrap()
-            .text()
-            .unwrap();
-
-        self.response_data = Some(response);
-
-        self.current_screen = CurrentScreen::Main;
-        self.currently_editing = None;
     }
 }
