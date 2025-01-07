@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use crossterm::event::{self, Event, KeyCode};
 
-use crate::tabs::Tab;
+use crate::tabs::{RequestInformation, Tab};
 
 #[derive(PartialEq, Default)]
 pub enum CurrentScreen {
@@ -12,11 +12,6 @@ pub enum CurrentScreen {
     Main,
     Editing,
     Quit,
-}
-
-pub enum CurrentlyEditing {
-    Url,
-    Verb,
 }
 
 pub struct App2 {
@@ -31,11 +26,13 @@ impl Default for App2 {
             verb_input: "GET".to_string(),
             url_input: "https://jsonplaceholder.typicode.com/posts".to_string(),
             response_data: None,
+            currently_editing: None,
         };
         let tab2 = Tab {
             verb_input: "POST".to_string(),
             url_input: "https://jsonplaceholder.typicode.com/comments".to_string(),
             response_data: None,
+            currently_editing: None,
         };
 
         App2 {
@@ -81,12 +78,48 @@ impl App2 {
                     KeyCode::Tab => {
                         self.active_tab = (self.active_tab + 1) % self.tabs.len();
                     }
+                    KeyCode::Char('u') => {
+                        self.current_screen = CurrentScreen::Editing;
+                        self.tabs[self.active_tab].currently_editing =
+                            Some(RequestInformation::Url);
+                    }
+                    KeyCode::Char('v') => {
+                        self.current_screen = CurrentScreen::Editing;
+                        self.tabs[self.active_tab].currently_editing =
+                            Some(RequestInformation::Verb);
+                    }
+                    KeyCode::Enter => {
+                        self.tabs[self.active_tab].make_request();
+                    }
                     _ => {}
                 },
 
                 CurrentScreen::Editing => match key.code {
-                    KeyCode::Char('q') => {
-                        self.current_screen = CurrentScreen::Quit;
+                    KeyCode::Esc => {
+                        self.current_screen = CurrentScreen::Main;
+                        self.tabs[self.active_tab].currently_editing = None;
+                    }
+                    KeyCode::Char(value) => {
+                        let tab = &mut self.tabs[self.active_tab];
+                        if let Some(editing) = &tab.currently_editing {
+                            match editing {
+                                RequestInformation::Verb => {
+                                    tab.verb_input.push(value);
+                                }
+                                RequestInformation::Url => {
+                                    tab.url_input.push(value);
+                                }
+                            }
+                        }
+                    }
+                    KeyCode::Backspace => {
+                        let tab = &mut self.tabs[self.active_tab];
+                        if let Some(editing) = &tab.currently_editing {
+                            match editing {
+                                RequestInformation::Verb => tab.verb_input.pop(),
+                                RequestInformation::Url => tab.url_input.pop(),
+                            };
+                        }
                     }
                     _ => {}
                 },
@@ -142,7 +175,7 @@ pub struct App {
     pub url_input: String,
     pub verb_input: String,
     pub current_screen: CurrentScreen,
-    pub currently_editing: Option<CurrentlyEditing>,
+    pub currently_editing: Option<RequestInformation>,
     pub response_data: Option<String>,
 }
 
