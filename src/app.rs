@@ -4,6 +4,8 @@ use std::time::Duration;
 
 use crossterm::event::{self, Event, KeyCode};
 
+use crate::tabs::Tab;
+
 #[derive(PartialEq, Default)]
 pub enum CurrentScreen {
     #[default]
@@ -17,45 +19,6 @@ pub enum CurrentlyEditing {
     Verb,
 }
 
-pub struct Tab {
-    pub verb_input: String,
-    pub url_input: String,
-    pub response_data: Option<String>,
-}
-
-impl Tab {
-    pub fn render(&self, area: Rect, buf: &mut Buffer) {
-        let vertical = Layout::vertical([Constraint::Length(3), Constraint::Min(1)]);
-
-        let [header, body] = vertical.areas(area);
-
-        self.render_inputs(header, buf);
-        // self.render_body(body, buf);
-    }
-    pub fn render_inputs(&self, area: Rect, buf: &mut Buffer) {
-        let layout = Layout::horizontal([Constraint::Length(10), Constraint::Min(1)]);
-
-        let [verb_input, url_input] = layout.areas(area);
-
-        let verb_text = "Verb".to_string();
-        let get = Span::styled(
-            verb_text,
-            Style::default().fg(Color::White).bg(Color::Green),
-        );
-        let verb_select =
-            Paragraph::new(Line::from(vec![get])).block(Block::default().borders(Borders::ALL));
-
-        let url_text = "Url".to_string();
-
-        let url = Span::styled(url_text, Style::default().fg(Color::White));
-        let url_box =
-            Paragraph::new(Line::from(vec![url])).block(Block::default().borders(Borders::ALL));
-
-        verb_select.render(verb_input, buf);
-        url_box.render(url_input, buf);
-    }
-}
-
 pub struct App2 {
     pub current_screen: CurrentScreen,
     pub active_tab: usize,
@@ -64,16 +27,21 @@ pub struct App2 {
 
 impl Default for App2 {
     fn default() -> Self {
-        let tab = Tab {
+        let tab1 = Tab {
             verb_input: "GET".to_string(),
             url_input: "https://jsonplaceholder.typicode.com/posts".to_string(),
+            response_data: None,
+        };
+        let tab2 = Tab {
+            verb_input: "POST".to_string(),
+            url_input: "https://jsonplaceholder.typicode.com/comments".to_string(),
             response_data: None,
         };
 
         App2 {
             current_screen: CurrentScreen::Main,
             active_tab: 0,
-            tabs: vec![tab],
+            tabs: vec![tab1, tab2],
         }
     }
 }
@@ -109,6 +77,9 @@ impl App2 {
                 CurrentScreen::Main => match key.code {
                     KeyCode::Char('q') => {
                         self.current_screen = CurrentScreen::Quit;
+                    }
+                    KeyCode::Tab => {
+                        self.active_tab = (self.active_tab + 1) % self.tabs.len();
                     }
                     _ => {}
                 },
@@ -148,21 +119,22 @@ impl App2 {
         //     Paragraph::new("POSTMAN TUI - You Can Request!".green().bold()).block(title_block);
         // title_text.render(area, buf);
 
-        let tab = Tab {
-            verb_input: "GET".to_string(),
-            url_input: "https://jsonplaceholder.typicode.com/posts".to_string(),
-            response_data: None,
-        };
-
         self.tabs[self.active_tab].render(area, buf);
     }
 
     pub fn render_header(&self, area: Rect, buf: &mut Buffer) {
-        let tabs_block = Block::bordered();
+        let tab_titles: Vec<&str> = self
+            .tabs
+            .iter()
+            .map(|tab| tab.verb_input.as_str())
+            .collect();
 
-        let tabs_text =
-            Paragraph::new("POSTMAN TUI - You Can Make Request!".green().bold()).block(tabs_block);
-        tabs_text.render(area, buf);
+        let tabs_block = Block::bordered().title("Requests");
+        let tabs = Tabs::new(tab_titles)
+            .select(self.active_tab)
+            .block(tabs_block);
+
+        tabs.render(area, buf);
     }
 }
 

@@ -11,7 +11,9 @@ use ratatui::{
 };
 
 mod app;
+mod tabs;
 mod ui;
+
 use crate::{
     app::{App, App2, CurrentScreen, CurrentlyEditing},
     ui::ui,
