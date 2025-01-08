@@ -9,3 +9,4 @@ ratatui = "0.29.0"
 reqwest = { version = "0.12.12", features = ["blocking"] }
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = "1.0.134"
+tui-input = "0.11.1"
