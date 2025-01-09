@@ -22,23 +22,11 @@ pub struct App {
 
 impl Default for App {
     fn default() -> Self {
-        let tab1 = Tab {
-            verb_input: "GET".into(),
-            url_input: "https://jsonplaceholder.typicode.com/posts".into(),
-            response_data: None,
-            currently_editing: None,
-        };
-        let tab2 = Tab {
-            verb_input: "POST".into(),
-            url_input: "https://jsonplaceholder.typicode.com/comments".into(),
-            response_data: None,
-            currently_editing: None,
-        };
-
+        let tab = Tab::default();
         App {
             current_screen: CurrentScreen::Main,
             active_tab: 0,
-            tabs: vec![tab1, tab2],
+            tabs: vec![tab],
         }
     }
 }
@@ -97,13 +85,7 @@ impl App {
                     }
 
                     KeyCode::Char('n') => {
-                        let tab = Tab {
-                            verb_input: "GET".into(),
-                            url_input: "https://jsonplaceholder.typicode.com/posts".into(),
-                            response_data: None,
-                            currently_editing: None,
-                        };
-                        self.tabs.push(tab);
+                        self.tabs.push(Tab::default());
                     }
 
                     KeyCode::Delete => {
@@ -114,11 +96,9 @@ impl App {
                             self.tabs.remove(self.active_tab);
                         }
                     }
-
-                    KeyCode::Enter => {
-                        self.tabs[self.active_tab].make_request();
+                    _ => {
+                        self.tabs[self.active_tab].handle_event(Event::Key(key));
                     }
-                    _ => {}
                 },
 
                 CurrentScreen::Editing => match key.code {

@@ -1,13 +1,14 @@
 use ratatui::{prelude::*, widgets::*};
 use tui_input::{backend::crossterm::EventHandler, Input};
 
-use crossterm::event::Event;
+use crossterm::event::{Event, KeyCode};
 
 pub enum RequestInformation {
     Url,
     Verb,
 }
 
+#[derive(Default)]
 pub struct Tab {
     pub verb_input: Input,
     pub url_input: Input,
@@ -64,6 +65,14 @@ impl Tab {
                 }
                 RequestInformation::Url => {
                     self.url_input.handle_event(&key_event);
+                }
+            }
+            if let Event::Key(key) = key_event {
+                match key.code {
+                    KeyCode::Enter => {
+                        self.make_request();
+                    }
+                    _ => {}
                 }
             }
         }
