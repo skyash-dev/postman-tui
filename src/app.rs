@@ -5,7 +5,6 @@ use std::time::Duration;
 use crossterm::event::{self, Event, KeyCode};
 
 use crate::tabs::{RequestInformation, Tab};
-use tui_input::{backend::crossterm::EventHandler, InputRequest};
 
 #[derive(PartialEq, Default)]
 pub enum CurrentScreen {
@@ -100,37 +99,10 @@ impl App {
                         self.current_screen = CurrentScreen::Main;
                         self.tabs[self.active_tab].currently_editing = None;
                     }
-                    KeyCode::Char(value) => {
+                    _ => {
                         let tab = &mut self.tabs[self.active_tab];
-                        if let Some(editing) = &tab.currently_editing {
-                            match editing {
-                                RequestInformation::Verb => {
-                                    tab.verb_input.handle_event(&Event::Key(key));
-                                }
-                                RequestInformation::Url => {
-                                    tab.url_input.handle_event(&Event::Key(key));
-                                }
-                            }
-                        }
+                        tab.handle_event(Event::Key(key));
                     }
-                    KeyCode::Backspace => {
-                        let tab = &mut self.tabs[self.active_tab];
-                        if let Some(editing) = &tab.currently_editing {
-                            match editing {
-                                RequestInformation::Verb => {
-                                    let req = InputRequest::DeletePrevChar;
-                                    let _res = tab.verb_input.handle(req);
-                                    // tab.verb_input.pop()
-                                }
-                                RequestInformation::Url => {
-                                    let req = InputRequest::DeletePrevChar;
-                                    let _res = tab.url_input.handle(req);
-                                    // tab.url_input.pop()
-                                }
-                            };
-                        }
-                    }
-                    _ => {}
                 },
                 CurrentScreen::Quit => {
                     return Ok(());

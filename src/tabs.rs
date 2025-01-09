@@ -1,6 +1,7 @@
 use ratatui::{prelude::*, widgets::*};
-use tui_input::backend::crossterm::EventHandler;
-use tui_input::Input;
+use tui_input::{backend::crossterm::EventHandler, Input};
+
+use crossterm::event::Event;
 
 pub enum RequestInformation {
     Url,
@@ -53,6 +54,19 @@ impl Tab {
 
         verb_select.render(verb_input, buf);
         url_box.render(url_input, buf);
+    }
+
+    pub fn handle_event(&mut self, key_event: Event) {
+        if let Some(editing) = &self.currently_editing {
+            match editing {
+                RequestInformation::Verb => {
+                    self.verb_input.handle_event(&key_event);
+                }
+                RequestInformation::Url => {
+                    self.url_input.handle_event(&key_event);
+                }
+            }
+        }
     }
 
     pub fn make_request(&mut self) {
