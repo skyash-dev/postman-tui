@@ -15,6 +15,7 @@ pub struct Tab {
     pub url_input: Input,
     pub response_data: Option<String>,
     pub currently_editing: Option<RequestInformation>,
+    pub scroll_position: (u16, u16),
 }
 
 impl Tab {
@@ -35,7 +36,8 @@ impl Tab {
 
         let data_box = Paragraph::new(pretty_data)
             .block(Block::default().borders(Borders::ALL))
-            .wrap(Wrap { trim: true });
+            .wrap(Wrap { trim: false })
+            .scroll(self.scroll_position);
         data_box.render(area, buf);
     }
 
@@ -76,6 +78,12 @@ impl Tab {
                 match key.code {
                     KeyCode::Enter => {
                         self.make_request();
+                    }
+                    KeyCode::Down => {
+                        self.scroll_position = (self.scroll_position.0.saturating_add(1), 0)
+                    }
+                    KeyCode::Up => {
+                        self.scroll_position = (self.scroll_position.0.saturating_sub(1), 0)
                     }
                     _ => {}
                 }
