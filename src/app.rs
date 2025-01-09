@@ -5,6 +5,7 @@ use std::time::Duration;
 use crossterm::event::{self, Event, KeyCode};
 
 use crate::tabs::{RequestInformation, Tab};
+use tui_input::{backend::crossterm::EventHandler, InputRequest};
 
 #[derive(PartialEq, Default)]
 pub enum CurrentScreen {
@@ -23,14 +24,14 @@ pub struct App {
 impl Default for App {
     fn default() -> Self {
         let tab1 = Tab {
-            verb_input: "GET".to_string(),
-            url_input: "https://jsonplaceholder.typicode.com/posts".to_string(),
+            verb_input: "GET".into(),
+            url_input: "https://jsonplaceholder.typicode.com/posts".into(),
             response_data: None,
             currently_editing: None,
         };
         let tab2 = Tab {
-            verb_input: "POST".to_string(),
-            url_input: "https://jsonplaceholder.typicode.com/comments".to_string(),
+            verb_input: "POST".into(),
+            url_input: "https://jsonplaceholder.typicode.com/comments".into(),
             response_data: None,
             currently_editing: None,
         };
@@ -104,10 +105,10 @@ impl App {
                         if let Some(editing) = &tab.currently_editing {
                             match editing {
                                 RequestInformation::Verb => {
-                                    tab.verb_input.push(value);
+                                    tab.verb_input.handle_event(&Event::Key(key));
                                 }
                                 RequestInformation::Url => {
-                                    tab.url_input.push(value);
+                                    tab.url_input.handle_event(&Event::Key(key));
                                 }
                             }
                         }
@@ -116,8 +117,16 @@ impl App {
                         let tab = &mut self.tabs[self.active_tab];
                         if let Some(editing) = &tab.currently_editing {
                             match editing {
-                                RequestInformation::Verb => tab.verb_input.pop(),
-                                RequestInformation::Url => tab.url_input.pop(),
+                                RequestInformation::Verb => {
+                                    let req = InputRequest::DeletePrevChar;
+                                    let _res = tab.verb_input.handle(req);
+                                    // tab.verb_input.pop()
+                                }
+                                RequestInformation::Url => {
+                                    let req = InputRequest::DeletePrevChar;
+                                    let _res = tab.url_input.handle(req);
+                                    // tab.url_input.pop()
+                                }
                             };
                         }
                     }
@@ -156,11 +165,7 @@ impl App {
     }
 
     pub fn render_header(&self, area: Rect, buf: &mut Buffer) {
-        let tab_titles: Vec<&str> = self
-            .tabs
-            .iter()
-            .map(|tab| tab.verb_input.as_str())
-            .collect();
+        let tab_titles: Vec<&str> = self.tabs.iter().map(|tab| tab.verb_input.value()).collect();
 
         let tabs_block = Block::bordered().title("Requests");
         let tabs = Tabs::new(tab_titles)

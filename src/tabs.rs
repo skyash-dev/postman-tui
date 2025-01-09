@@ -1,4 +1,6 @@
 use ratatui::{prelude::*, widgets::*};
+use tui_input::backend::crossterm::EventHandler;
+use tui_input::Input;
 
 pub enum RequestInformation {
     Url,
@@ -6,8 +8,8 @@ pub enum RequestInformation {
 }
 
 pub struct Tab {
-    pub verb_input: String,
-    pub url_input: String,
+    pub verb_input: Input,
+    pub url_input: Input,
     pub response_data: Option<String>,
     pub currently_editing: Option<RequestInformation>,
 }
@@ -35,7 +37,7 @@ impl Tab {
 
         let [verb_input, url_input] = layout.areas(area);
 
-        let verb_text = self.verb_input.clone();
+        let verb_text = self.verb_input.value();
         let get = Span::styled(
             verb_text,
             Style::default().fg(Color::White).bg(Color::Green),
@@ -43,7 +45,7 @@ impl Tab {
         let verb_select =
             Paragraph::new(Line::from(vec![get])).block(Block::default().borders(Borders::ALL));
 
-        let url_text = self.url_input.clone();
+        let url_text = self.url_input.value();
 
         let url = Span::styled(url_text, Style::default().fg(Color::White));
         let url_box =
@@ -54,7 +56,7 @@ impl Tab {
     }
 
     pub fn make_request(&mut self) {
-        let response = reqwest::blocking::get(&self.url_input)
+        let response = reqwest::blocking::get(&self.url_input.to_string())
             .unwrap()
             .text()
             .unwrap();
