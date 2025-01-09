@@ -2,6 +2,7 @@ use ratatui::{prelude::*, widgets::*};
 use tui_input::{backend::crossterm::EventHandler, Input};
 
 use crossterm::event::{Event, KeyCode};
+use serde_json::{from_str, to_string_pretty, Value};
 
 pub enum RequestInformation {
     Url,
@@ -28,10 +29,14 @@ impl Tab {
 
     pub fn render_body(&self, area: Rect, buf: &mut Buffer) {
         let text = self.response_data.clone().unwrap_or_default();
-        let url = Span::styled(text, Style::default().fg(Color::White));
-        let url_box =
-            Paragraph::new(Line::from(vec![url])).block(Block::default().borders(Borders::ALL));
-        url_box.render(area, buf);
+
+        let json: Value = from_str(text.as_str()).unwrap_or_default();
+        let pretty_data = to_string_pretty(&json).unwrap();
+
+        let data_box = Paragraph::new(pretty_data)
+            .block(Block::default().borders(Borders::ALL))
+            .wrap(Wrap { trim: true });
+        data_box.render(area, buf);
     }
 
     pub fn render_inputs(&self, area: Rect, buf: &mut Buffer) {
