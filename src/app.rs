@@ -75,8 +75,15 @@ impl App {
                     KeyCode::Char('q') => {
                         self.current_screen = CurrentScreen::Quit;
                     }
-                    KeyCode::Tab => {
+                    KeyCode::Char('l') | KeyCode::Tab => {
                         self.active_tab = (self.active_tab + 1) % self.tabs.len();
+                    }
+                    KeyCode::Char('h') | KeyCode::BackTab => {
+                        if self.active_tab == 0 {
+                            self.active_tab = self.tabs.len() - 1;
+                        } else {
+                            self.active_tab = (self.active_tab - 1) % self.tabs.len();
+                        }
                     }
                     KeyCode::Char('u') => {
                         self.current_screen = CurrentScreen::Editing;
@@ -88,6 +95,26 @@ impl App {
                         self.tabs[self.active_tab].currently_editing =
                             Some(RequestInformation::Verb);
                     }
+
+                    KeyCode::Char('n') => {
+                        let tab = Tab {
+                            verb_input: "GET".into(),
+                            url_input: "https://jsonplaceholder.typicode.com/posts".into(),
+                            response_data: None,
+                            currently_editing: None,
+                        };
+                        self.tabs.push(tab);
+                    }
+
+                    KeyCode::Delete => {
+                        if self.active_tab == (self.tabs.len() - 1) {
+                            self.tabs.pop();
+                            self.active_tab = 0;
+                        } else {
+                            self.tabs.remove(self.active_tab);
+                        }
+                    }
+
                     KeyCode::Enter => {
                         self.tabs[self.active_tab].make_request();
                     }
