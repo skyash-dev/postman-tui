@@ -22,11 +22,45 @@ pub struct App {
 
 impl Default for App {
     fn default() -> Self {
-        let tab = Tab::default();
+        let get = Tab {
+            verb_input: "GET".into(),
+            url_input: "https://jsonplaceholder.typicode.com/posts".into(),
+            response_data: None,
+            currently_editing: None,
+            scroll_position: (0, 0),
+        };
+        let post = Tab {
+            verb_input: "POST".into(),
+            url_input: "https://jsonplaceholder.typicode.com/comments".into(),
+            response_data: None,
+            currently_editing: None,
+            scroll_position: (0, 0),
+        };
+        let put = Tab {
+            verb_input: "PUT".into(),
+            url_input: "https://jsonplaceholder.typicode.com/comments".into(),
+            response_data: None,
+            currently_editing: None,
+            scroll_position: (0, 0),
+        };
+        let patch = Tab {
+            verb_input: "PATCH".into(),
+            url_input: "https://jsonplaceholder.typicode.com/comments".into(),
+            response_data: None,
+            currently_editing: None,
+            scroll_position: (0, 0),
+        };
+        let delete = Tab {
+            verb_input: "DELETE".into(),
+            url_input: "https://jsonplaceholder.typicode.com/comments".into(),
+            response_data: None,
+            currently_editing: None,
+            scroll_position: (0, 0),
+        };
         App {
             current_screen: CurrentScreen::Main,
             active_tab: 0,
-            tabs: vec![tab],
+            tabs: vec![get, post, put, patch, delete],
         }
     }
 }
