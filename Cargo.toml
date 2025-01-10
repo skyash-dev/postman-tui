@@ -2,6 +2,14 @@
 name = "postman-tui"
 version = "0.1.0"
 edition = "2021"
+authors = ["Yash <yashpc09@gmail.com>"]
+description = "A simple API client (postman like) in your terminal"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/skyash-dev/postman-tui"
+readme = "README.md"
+keywords = ["postman", "tui", "ratatui", "http"]
+categories = ["command-line-utilities", "network-programming"]
+
 
 [dependencies]
 crossterm = "0.28.1"
